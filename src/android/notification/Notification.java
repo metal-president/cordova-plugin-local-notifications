@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.service.notification.StatusBarNotification;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.util.ArraySet;
@@ -218,7 +219,7 @@ public final class Notification {
                 continue;
 
             PendingIntent pi = PendingIntent.getBroadcast(
-                    context, 0, intent, FLAG_CANCEL_CURRENT);
+                    context, 0, intent, preparePendingIntentFlags(FLAG_CANCEL_CURRENT));
 
             try {
                 switch (options.getPrio()) {
@@ -305,7 +306,7 @@ public final class Notification {
             Intent intent = new Intent(action);
 
             PendingIntent pi = PendingIntent.getBroadcast(
-                    context, 0, intent, 0);
+                    context, 0, intent, preparePendingIntentFlags(0));
 
             if (pi != null) {
                 getAlarmMgr().cancel(pi);
@@ -489,4 +490,11 @@ public final class Notification {
         return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
 
+    private static int preparePendingIntentFlags(int flags) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            return flags | PendingIntent.FLAG_IMMUTABLE;
+        } else {
+            return flags;
+        }
+    }    
 }
